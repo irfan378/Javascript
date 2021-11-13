@@ -1,0 +1,82 @@
+(function(FS) {
+  var session = FS.getCurrentSession(), sessionUrl = FS.getCurrentSessionURL();
+  function retryWithBackoff(condition, callback, maxWait, failureMsg) {
+    var totalTimeExpired = 0;
+    var wait = 64;
+    var resultFn = function() {
+      if (condition()) {
+        callback();
+        return;
+      }
+      wait = Math.min(wait * 2, 1024);
+      if (totalTimeExpired > maxWait) {
+        FS.log('warn', failureMsg);
+        return;
+      }
+      totalTimeExpired += wait
+      setTimeout(resultFn, wait);
+    };
+    return resultFn;
+  }
+  function loadSession(key) {
+	var lastSession = window['localStorage'].getItem(key);
+    if (!lastSession) {
+      lastSession = FS._cookies()[key];
+    }
+    return lastSession
+  }
+  function saveSession(key, session) {
+    window['localStorage'].setItem(key, session);
+  }
+
+  (function() {
+    var bs;
+    if (window['bugsnagClient']) {
+      // For bugsnag API versions 4 through 6
+      bs = window.bugsnagClient;
+    } else if (window['Bugsnag']) {
+      // For bugsnag API version 3, or 7+ (as of Dec. 2020)
+      bs = window.Bugsnag;
+    } else {
+      FS.log("warn", "Bugsnag script was not loaded even though the Bugsnag integration is turned on.");
+      return;
+    }
+	if (bs.addMetadata) {
+		// Recent versions have this API
+		bs.addMetadata('fullstory', { url: sessionUrl })
+	} else {
+		if (!bs.metaData) {
+		  bs.metaData = {};
+		}
+		if (!bs.metaData.fullstory) {
+		  bs.metaData.fullstory = {};
+		}
+		bs.metaData.fullstory.url = sessionUrl;
+	}
+  })();
+  
+  function gaOnPage() {
+    return window['ga'] && typeof(ga)=="function";
+  }
+  function fsGaInit() {
+    ga(function() {
+      var sentMap = {};
+      var dimensionMap = {};
+      dimensionMap['UA-45092266-25'] = 'dimension5';
+      dimensionMap['UA-45092266-27'] = 'dimension5';
+      ga.getAll().forEach(function(tracker) {
+        var propertyId = tracker.get('trackingId');
+        if (dimensionMap[propertyId] && !sentMap[propertyId]) {
+          tracker.set(dimensionMap[propertyId], sessionUrl);
+          tracker.send('event', {
+            'eventCategory': 'FullStory',
+            'nonInteraction': 1
+          });
+          sentMap[propertyId] = true;
+        }
+      });
+    });
+  }
+  retryWithBackoff(gaOnPage, fsGaInit, 4000, 'The FullStory integration with Google Analytics is enabled, but FullStory could not find Google Analytics on the page.')();
+  
+})(window['_fs_namespace'] ? window[window['_fs_namespace']] : window['FS'])
