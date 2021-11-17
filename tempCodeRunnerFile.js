@@ -1,1 +1,1 @@
- console.log('hello world');
+let regex=/i[a-z]fan/
