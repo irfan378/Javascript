@@ -12,7 +12,13 @@
       integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="prism.css">
 
+    <style>
+      #responsePre{
+        max-height: 500px;
+      }
+    </style>
     <title>Postman Clone</title>
   </head>
   <body>
@@ -57,7 +63,7 @@
           <input
             type="text"
             class="form-control"
-            id="urlField"
+            id="url"
             placeholder="Enter your URL"
           />
         </div>
@@ -70,6 +76,7 @@
                 type="radio"
                 name="requestType"
                 id="get"
+                value="GET"
               />
               <label class="form-check-label" for="get"> GET </label>
             </div>
@@ -80,6 +87,7 @@
                 type="radio"
                 name="requestType"
                 id="post"
+                value="POST"
                 checked
               />
               <label class="form-check-label" for="post"> POST </label>
@@ -96,6 +104,7 @@
                 type="radio"
                 name="contentType"
                 id="jsonRadio"
+                value="json"
               />
               <label class="form-check-label" for="json"> JSON </label>
             </div>
@@ -105,9 +114,10 @@
                 type="radio"
                 name="contentType"
                 id="paramsRadio"
+                value="params"
                 checked
               />
-              <label class="form-check-label" for="params">
+              <label class="form-check-label" for="params" >
                 Custom Parameters
               </label>
             </div>
@@ -116,13 +126,57 @@
       </div>
 
       <div id="parametersBox">
-          
+        <div class="row g-3">
+          <label for="inputEmail4" class="form-label">Parameter 1</label>
+          <div class="col-md-4">
+            <input
+              type="text"
+              class="form-control"
+              id="parameterKey1"
+              placeholder="Enter Parmeter 1 key"
+            />
+          </div>
+          <div class="col-md-4">
+            <input
+              type="text"
+              class="form-control"
+              id="parameterValue1"
+              placeholder="Enter parameter 1 value"
+            />
+          </div>
+          <button id="addParam" class="btn btn-primary col-md-1">+</button>
+        </div>
+        <div id="params"></div>
+      </div>
+      <!-- JSON request box -->
+      <div  class="mb-3 my-3" id="requestJsonBox">
+        <label for="requestJsonText" class="form-label"
+          >Enter request JSON</label
+        >
+        <textarea class="form-control" id="requestJsonText" rows="3"></textarea>
+      </div>
+      <!-- submit button -->
+      <div class="mb-3 my-3" id="requestJsonBox">
+        <button id="submit" class="btn btn-primary">Submit</button>
+      </div>
+
+      <!-- Response -->
+      <div class="mb-3 my-3" id="responseJsonBox">
+        <label for="responseJsonText" class="form-label"
+          >Response</label
+        >
+        <!-- <textarea class="form-control" id="responseJsonText" rows="3">Your response will appear here</textarea> -->
+        <pre id="reponsePre" class="language-javascript">
+          <code id="responsePrism" class="language-javascript"></code>
+        </pre>
       </div>
     </div>
 
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="app.js"></script>
+    <script src="prism.js"></script>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
